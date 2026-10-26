@@ -30,7 +30,7 @@ A simulation framework for intelligent warehouse logistics. A fleet of ground AM
 
 ## Stack
 
-ROS2 Jazzy Jalisco · Gazebo Harmonic · Python 3 (`rclpy`) · `ros_gz_bridge` / `ros_gz_interfaces` · `websockets`
+ROS2 Jazzy Jalisco · Gazebo Harmonic · Python 3 (rclpy) · ros_gz_bridge / ros_gz_interfaces · websockets · SLAM Toolbox · LiDAR · Nav2 · RViz2
 
 ## Getting started
 
