@@ -1,0 +1,1082 @@
+<?xml version="1.0"?>
+<robot name="warehouse_drone">
+
+  <!-- ==================== -->
+  <!--  MATERIALS           -->
+  <!-- ==================== -->
+  <material name="drone_dark">
+    <color rgba="0.12 0.12 0.12 1.0"/>
+  </material>
+  <material name="drone_red">
+    <color rgba="0.85 0.10 0.10 1.0"/>
+  </material>
+  <material name="drone_orange">
+    <color rgba="0.95 0.50 0.05 1.0"/>
+  </material>
+  <material name="drone_white">
+    <color rgba="0.92 0.92 0.92 1.0"/>
+  </material>
+  <material name="drone_yellow">
+    <color rgba="0.95 0.80 0.05 1.0"/>
+  </material>
+  <material name="drone_blue">
+    <color rgba="0.10 0.35 0.90 1.0"/>
+  </material>
+  <material name="drone_green">
+    <color rgba="0.10 0.75 0.20 1.0"/>
+  </material>
+  <material name="propeller_dark">
+    <color rgba="0.08 0.08 0.08 1.0"/>
+  </material>
+
+  <!-- ==================== -->
+  <!--  BASE LINK (body)    -->
+  <!-- ==================== -->
+  <link name="base_link">
+    <inertial>
+      <mass value="1.8"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.035" iyy="0.035" izz="0.055"
+               ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+
+    <!-- Main central body — dark octagonal hub -->
+    <visual name="body_main">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.22 0.22 0.08"/>
+      </geometry>
+      <material name="drone_dark"/>
+    </visual>
+
+    <!-- Top cover plate — slightly lighter -->
+    <visual name="body_top">
+      <origin xyz="0 0 0.045" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.20 0.20 0.01"/>
+      </geometry>
+      <material name="drone_orange"/>
+    </visual>
+
+    <!-- Battery pack bottom -->
+    <visual name="battery">
+      <origin xyz="0 0 -0.045" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.16 0.10 0.02"/>
+      </geometry>
+      <material name="drone_yellow"/>
+    </visual>
+
+    <!-- Status LED front (green) -->
+    <visual name="led_front">
+      <origin xyz="0.11 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.012"/>
+      </geometry>
+      <material name="drone_green"/>
+    </visual>
+
+    <!-- Status LED rear (red) -->
+    <visual name="led_rear">
+      <origin xyz="-0.11 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.012"/>
+      </geometry>
+      <material name="drone_red"/>
+    </visual>
+
+    <!-- Collision -->
+    <collision name="body_col">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.22 0.22 0.10"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ==================== -->
+  <!--  ARM FL (front-left) -->
+  <!-- ==================== -->
+  <link name="arm_fl">
+    <inertial>
+      <mass value="0.10"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="arm_vis">
+      <origin xyz="0 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="arm_col">
+      <origin xyz="0 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_fl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_fl"/>
+    <origin xyz="0.12 0.12 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ARM FR (front-right) -->
+  <link name="arm_fr">
+    <inertial>
+      <mass value="0.10"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="arm_vis">
+      <origin xyz="0 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="arm_col">
+      <origin xyz="0 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_fr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_fr"/>
+    <origin xyz="0.12 -0.12 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ARM RL (rear-left) -->
+  <link name="arm_rl">
+    <inertial>
+      <mass value="0.10"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="arm_vis">
+      <origin xyz="0 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="arm_col">
+      <origin xyz="0 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_rl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_rl"/>
+    <origin xyz="-0.12 0.12 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ARM RR (rear-right) -->
+  <link name="arm_rr">
+    <inertial>
+      <mass value="0.10"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="arm_vis">
+      <origin xyz="0 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="arm_col">
+      <origin xyz="0 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.30 0.025 0.018"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_rr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_rr"/>
+    <origin xyz="-0.12 -0.12 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!--  MOTOR MOUNTS (x4)   -->
+  <!-- ==================== -->
+  <link name="motor_fl">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="motor_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="motor_col">
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+    </collision>
+  </link>
+  <joint name="motor_fl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="motor_fl"/>
+    <origin xyz="0.22 0.22 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <link name="motor_fr">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="motor_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="motor_col">
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+    </collision>
+  </link>
+  <joint name="motor_fr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="motor_fr"/>
+    <origin xyz="0.22 -0.22 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <link name="motor_rl">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="motor_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="motor_col">
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+    </collision>
+  </link>
+  <joint name="motor_rl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="motor_rl"/>
+    <origin xyz="-0.22 0.22 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <link name="motor_rr">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="motor_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <collision name="motor_col">
+      <geometry><cylinder radius="0.022" length="0.040"/></geometry>
+    </collision>
+  </link>
+  <joint name="motor_rr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="motor_rr"/>
+    <origin xyz="-0.22 -0.22 0.015" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!--  PROPELLERS (x4)     -->
+  <!-- ==================== -->
+  <link name="prop_fl">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0002"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="prop_vis">
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+    <visual name="prop_vis2">
+      <origin xyz="0 0 0.025" rpy="0 0 1.5708"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+  </link>
+  <joint name="prop_fl_joint" type="continuous">
+    <parent link="motor_fl"/>
+    <child link="prop_fl"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="prop_fr">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0002"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="prop_vis">
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+    <visual name="prop_vis2">
+      <origin xyz="0 0 0.025" rpy="0 0 1.5708"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+  </link>
+  <joint name="prop_fr_joint" type="continuous">
+    <parent link="motor_fr"/>
+    <child link="prop_fr"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="prop_rl">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0002"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="prop_vis">
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+    <visual name="prop_vis2">
+      <origin xyz="0 0 0.025" rpy="0 0 1.5708"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+  </link>
+  <joint name="prop_rl_joint" type="continuous">
+    <parent link="motor_rl"/>
+    <child link="prop_rl"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="prop_rr">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0002"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="prop_vis">
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+    <visual name="prop_vis2">
+      <origin xyz="0 0 0.025" rpy="0 0 1.5708"/>
+      <geometry><box size="0.28 0.030 0.008"/></geometry>
+      <material name="propeller_dark"/>
+    </visual>
+  </link>
+  <joint name="prop_rr_joint" type="continuous">
+    <parent link="motor_rr"/>
+    <child link="prop_rr"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!--  LANDING LEGS (x4)   -->
+  <!-- ==================== -->
+  <link name="leg_fl">
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="leg_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <visual name="foot_vis">
+      <origin xyz="0 0 -0.055" rpy="0 0 0"/>
+      <geometry><sphere radius="0.014"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <collision name="leg_col">
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+    </collision>
+  </link>
+  <joint name="leg_fl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="leg_fl"/>
+    <origin xyz="0.10 0.10 -0.07" rpy="0 0 0"/>
+  </joint>
+
+  <link name="leg_fr">
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="leg_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <visual name="foot_vis">
+      <origin xyz="0 0 -0.055" rpy="0 0 0"/>
+      <geometry><sphere radius="0.014"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <collision name="leg_col">
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+    </collision>
+  </link>
+  <joint name="leg_fr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="leg_fr"/>
+    <origin xyz="0.10 -0.10 -0.07" rpy="0 0 0"/>
+  </joint>
+
+  <link name="leg_rl">
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="leg_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <visual name="foot_vis">
+      <origin xyz="0 0 -0.055" rpy="0 0 0"/>
+      <geometry><sphere radius="0.014"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <collision name="leg_col">
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+    </collision>
+  </link>
+  <joint name="leg_rl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="leg_rl"/>
+    <origin xyz="-0.10 0.10 -0.07" rpy="0 0 0"/>
+  </joint>
+
+  <link name="leg_rr">
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="leg_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <visual name="foot_vis">
+      <origin xyz="0 0 -0.055" rpy="0 0 0"/>
+      <geometry><sphere radius="0.014"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <collision name="leg_col">
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+    </collision>
+  </link>
+  <joint name="leg_rr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="leg_rr"/>
+    <origin xyz="-0.10 -0.10 -0.07" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!-- ==================== -->
+  <link name="camera_down">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual name="cam_vis">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.04 0.04 0.025"/></geometry>
+      <material name="drone_blue"/>
+    </visual>
+    <collision name="cam_col">
+      <geometry><box size="0.04 0.04 0.025"/></geometry>
+    </collision>
+  </link>
+  <joint name="camera_down_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_down"/>
+    <origin xyz="0.08 0 -0.052" rpy="0 1.5708 0"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!--  GRIPPER HOOK        -->
+  <!-- ==================== -->
+  <link name="gripper_link">
+    <inertial>
+      <mass value="0.15"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <!-- Gripper arm -->
+    <visual name="gripper_arm">
+      <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+      <material name="drone_dark"/>
+    </visual>
+    <!-- Gripper claw left -->
+    <visual name="claw_l">
+      <origin xyz="-0.04 0 -0.125" rpy="0 0.4 0"/>
+      <geometry><box size="0.06 0.010 0.015"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <!-- Gripper claw right -->
+    <visual name="claw_r">
+      <origin xyz="0.04 0 -0.125" rpy="0 -0.4 0"/>
+      <geometry><box size="0.06 0.010 0.015"/></geometry>
+      <material name="drone_orange"/>
+    </visual>
+    <collision name="gripper_col">
+      <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.008" length="0.12"/></geometry>
+    </collision>
+  </link>
+  <joint name="gripper_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gripper_link"/>
+    <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== -->
+  <!--  GAZEBO PLUGINS      -->
+  <!-- ==================== -->
+
+  <!-- Multicopter velocity controller — this makes the drone fly -->
+  <gazebo>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>drone</robotNamespace>
+      <jointName>prop_fl_joint</jointName>
+      <linkName>prop_fl</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1100</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>drone</robotNamespace>
+      <jointName>prop_fr_joint</jointName>
+      <linkName>prop_fr</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1100</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>1</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>drone</robotNamespace>
+      <jointName>prop_rl_joint</jointName>
+      <linkName>prop_rl</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1100</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>2</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <robotNamespace>drone</robotNamespace>
+      <jointName>prop_rr_joint</jointName>
+      <linkName>prop_rr</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1100</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>3</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+    </plugin>
+  </gazebo>
+
+  <!-- Multicopter velocity control — translates cmd_vel to motor speeds -->
+  <gazebo>
+    <plugin filename="gz-sim-multicopter-control-system"
+            name="gz::sim::systems::MulticopterVelocityControl">
+      <robotNamespace>drone</robotNamespace>
+      <commandSubTopic>cmd_vel</commandSubTopic>
+      <enableSubTopic>enable</enableSubTopic>
+      <comLinkName>base_link</comLinkName>
+      <velocityGain>2.7 2.7 2.7</velocityGain>
+      <attitudeGain>2.0 3.0 0.15</attitudeGain>
+      <angularRateGain>0.4 0.52 0.18</angularRateGain>
+      <maximumLinearAcceleration>2 2 2</maximumLinearAcceleration>
+      <rotorConfiguration>
+        <rotor>
+          <jointName>prop_fl_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+        <rotor>
+          <jointName>prop_fr_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>prop_rl_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>prop_rr_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+      </rotorConfiguration>
+    </plugin>
+  </gazebo>
+
+  <!-- Odometry -->
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>drone/odom</odom_frame>
+      <robot_base_frame>drone/base_link</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>3</dimensions>
+    </plugin>
+  </gazebo>
+
+  <!-- Downward camera sensor -->
+  <gazebo reference="camera_down">
+    <sensor name="down_camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <update_rate>10</update_rate>
+      <topic>drone/camera/image_raw</topic>
+      <camera>
+        <horizontal_fov>1.2</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>20</far>
+        </clip>
+      </camera>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+    </sensor>
+  </gazebo>
+
+  <!-- Body colour in Gazebo -->
+  <gazebo reference="base_link">
+    <material>
+      <ambient>0.12 0.12 0.12 1</ambient>
+      <diffuse>0.15 0.15 0.15 1</diffuse>
+      <specular>0.4 0.4 0.4 1</specular>
+    </material>
+  </gazebo>
+
+  <gazebo reference="arm_fl">
+    <material>
+      <ambient>0.12 0.12 0.12 1</ambient>
+      <diffuse>0.15 0.15 0.15 1</diffuse>
+    </material>
+  </gazebo>
+  <gazebo reference="arm_fr">
+    <material>
+      <ambient>0.12 0.12 0.12 1</ambient>
+      <diffuse>0.15 0.15 0.15 1</diffuse>
+    </material>
+  </gazebo>
+  <gazebo reference="arm_rl">
+    <material>
+      <ambient>0.12 0.12 0.12 1</ambient>
+      <diffuse>0.15 0.15 0.15 1</diffuse>
+    </material>
+  </gazebo>
+  <gazebo reference="arm_rr">
+    <material>
+      <ambient>0.12 0.12 0.12 1</ambient>
+      <diffuse>0.15 0.15 0.15 1</diffuse>
+    </material>
+  </gazebo>
+
+
+  <!-- ================================ -->
+  <!--  RANGEFINDER SENSORS (8 dirs)    -->
+  <!--  front, back, left, right,       -->
+  <!--  front-left, front-right,        -->
+  <!--  back-left, back-right           -->
+  <!-- ================================ -->
+
+  <link name="rf_front_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_front_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_front_link"/>
+    <origin xyz="0.15 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="rf_front_link">
+    <sensor name="rf_front" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_front</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_back_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_back_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_back_link"/>
+    <origin xyz="-0.15 0.0 0.0" rpy="0 0 3.1416"/>
+  </joint>
+  <gazebo reference="rf_back_link">
+    <sensor name="rf_back" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_back</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_left_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_left_link"/>
+    <origin xyz="0.0 0.15 0.0" rpy="0 0 1.5708"/>
+  </joint>
+  <gazebo reference="rf_left_link">
+    <sensor name="rf_left" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_left</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_right_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_right_link"/>
+    <origin xyz="0.0 -0.15 0.0" rpy="0 0 -1.5708"/>
+  </joint>
+  <gazebo reference="rf_right_link">
+    <sensor name="rf_right" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_right</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_front_left_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_front_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_front_left_link"/>
+    <origin xyz="0.11 0.11 0.0" rpy="0 0 0.7854"/>
+  </joint>
+  <gazebo reference="rf_front_left_link">
+    <sensor name="rf_front_left" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_front_left</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_front_right_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_front_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_front_right_link"/>
+    <origin xyz="0.11 -0.11 0.0" rpy="0 0 -0.7854"/>
+  </joint>
+  <gazebo reference="rf_front_right_link">
+    <sensor name="rf_front_right" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_front_right</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_back_left_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_back_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_back_left_link"/>
+    <origin xyz="-0.11 0.11 0.0" rpy="0 0 2.3562"/>
+  </joint>
+  <gazebo reference="rf_back_left_link">
+    <sensor name="rf_back_left" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_back_left</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_back_right_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_back_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_back_right_link"/>
+    <origin xyz="-0.11 -0.11 0.0" rpy="0 0 -2.3562"/>
+  </joint>
+  <gazebo reference="rf_back_right_link">
+    <sensor name="rf_back_right" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_back_right</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <link name="rf_down_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.000001" iyy="0.000001" izz="0.000001"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="rf_down_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rf_down_link"/>
+    <origin xyz="0.0 0.0 -0.1" rpy="0 1.5708 0"/>
+  </joint>
+  <gazebo reference="rf_down_link">
+    <sensor name="rf_down" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>20</update_rate>
+      <topic>/drone/rf_down</topic>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+</robot>

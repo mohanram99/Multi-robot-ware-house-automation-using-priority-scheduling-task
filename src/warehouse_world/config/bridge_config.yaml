@@ -1,0 +1,128 @@
+# Bridge config — 4 robots (drone + 2 small AMRs + big AMR)
+# Run with the set_pose service on the command line:
+#   ros2 run ros_gz_bridge parameter_bridge \
+#     "/world/multi_robot_warehouse/set_pose@ros_gz_interfaces/srv/SetEntityPose" \
+#     --ros-args -p config_file:=<path to this file>
+
+# ─────────────── DRONE ───────────────
+- ros_topic_name: "/drone/cmd_vel"
+  gz_topic_name: "/drone/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/drone/enable"
+  gz_topic_name: "/drone/enable"
+  ros_type_name: "std_msgs/msg/Bool"
+  gz_type_name: "gz.msgs.Boolean"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/drone/imu"
+  gz_topic_name: "/drone/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/drone/air_pressure"
+  gz_topic_name: "/drone/air_pressure"
+  ros_type_name: "sensor_msgs/msg/FluidPressure"
+  gz_type_name: "gz.msgs.FluidPressure"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/model/drone/odometry"
+  gz_topic_name: "/model/drone/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+# ─────────────── SMALL AMR 1 (warehouse_amr) ───────────────
+- ros_topic_name: "/warehouse_amr/cmd_vel"
+  gz_topic_name: "/warehouse_amr/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/model/warehouse_amr/odometry"
+  gz_topic_name: "/model/warehouse_amr/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/scan"
+  gz_topic_name: "/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+# ─────────────── SMALL AMR 2 (warehouse_amr2) ───────────────
+- ros_topic_name: "/warehouse_amr2/cmd_vel"
+  gz_topic_name: "/warehouse_amr2/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/model/warehouse_amr2/odometry"
+  gz_topic_name: "/model/warehouse_amr2/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/scan2"
+  gz_topic_name: "/scan2"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+# ─────────────── BIG AMR (big_amr) ───────────────
+- ros_topic_name: "/big_amr/cmd_vel"
+  gz_topic_name: "/big_amr/cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/model/big_amr/odometry"
+  gz_topic_name: "/model/big_amr/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/big_amr/scan"
+  gz_topic_name: "/big_amr/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+# ─────────────── GROUND-TRUTH POSES (all models in one topic) ───────────────
+- ros_topic_name: "/world/multi_robot_warehouse/dynamic_pose/info"
+  gz_topic_name: "/world/multi_robot_warehouse/dynamic_pose/info"
+  ros_type_name: "tf2_msgs/msg/TFMessage"
+  gz_type_name: "gz.msgs.Pose_V"
+  direction: GZ_TO_ROS
+
+  # ─────────────────────────────────────────────────────────────────────
+# LiDAR scan bridge entries — ADD THESE to your existing bridge_config.yaml
+# (the same file you pass as config_file:= to ros_gz_bridge).
+#
+# These bridge each robot's gz LaserScan topic into ROS2 so the master
+# (warehouse_master.py) can subscribe and report detected obstacles.
+#
+# Direction GZ_TO_ROS: data flows from Gazebo out to ROS2 (we only read).
+# ─────────────────────────────────────────────────────────────────────
+
+- ros_topic_name: "/scan"
+  gz_topic_name: "/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/scan2"
+  gz_topic_name: "/scan2"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/big_amr/scan"
+  gz_topic_name: "/big_amr/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS

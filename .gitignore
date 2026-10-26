@@ -1,0 +1,26 @@
+# ROS2 / colcon build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Windows "downloaded file" marker streams
+*Zone.Identifier*
+
+# Editor / OS junk
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ROS bag files (usually large — track separately if needed)
+*.bag
+*.db3
+
+# Gazebo cache
+.gazebo/

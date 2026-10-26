@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warehouse Mission Control</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171d26; --panel2:#1f2731; --line:#2b3543;
+    --txt:#e9edf3; --dim:#8a97aa; --acc:#4da3ff; --ok:#39d98a;
+    --warn:#ffb020; --urgent:#ff5d5d; --teal:#2dd4bf;
+    --drone:#4da3ff; --amr:#39d98a; --amr2:#2dd4bf; --big:#ffb020;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  body{background:var(--bg);color:var(--txt);min-height:100vh;padding:16px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 18px;margin-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:.3px}
+  .brand .ico{font-size:20px}
+  .top-right{display:flex;align-items:center;gap:14px}
+  .pill{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:7px}
+  .pill .led{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .pill.on{background:rgba(57,217,138,.12);color:var(--ok)}
+  .pill.on .led{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .pill.off{background:rgba(255,93,93,.12);color:var(--urgent)}
+  .pill.off .led{background:var(--urgent)}
+  .elapsed{font-size:12px;color:var(--dim)}
+  .elapsed b{color:var(--txt);font-variant-numeric:tabular-nums}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+  .stat .val{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .stat.queued .val{color:var(--acc)} .stat.prog .val{color:var(--warn)}
+  .stat.done .val{color:var(--ok)} .stat.idle .val{color:var(--teal)}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:14px;align-items:start}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .panel h2{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+  .legend{display:flex;gap:12px;font-size:11px;color:var(--dim);font-weight:600;text-transform:none;letter-spacing:0}
+  .legend span{display:flex;align-items:center;gap:5px}
+  .legend .d{width:9px;height:9px;border-radius:50%}
+  canvas{width:100%;border-radius:10px;background:#0c1117;border:1px solid var(--line);display:block}
+  .speed-row{display:flex;align-items:center;gap:14px;margin-top:14px}
+  .speed-row label{font-size:12px;color:var(--dim);min-width:48px}
+  input[type=range]{flex:1;accent-color:var(--acc);cursor:pointer}
+  .speed-val{font-size:14px;font-weight:700;color:var(--acc);min-width:36px;text-align:right}
+  .robots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .rcard{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .rcard .name{font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px}
+  .rcard .dot{width:9px;height:9px;border-radius:50%}
+  .badge{font-size:9px;padding:2px 7px;border-radius:9px;font-weight:800;letter-spacing:.5px;margin-left:auto}
+  .IDLE{background:rgba(57,217,138,.14);color:var(--ok)}
+  .BUSY{background:rgba(255,176,32,.14);color:var(--warn)}
+  .rcard .meta{color:var(--dim);font-size:10.5px;margin-top:6px;line-height:1.6}
+  .rcard .meta .lidar{color:var(--warn)}
+  label.fld{font-size:11px;color:var(--dim);display:block;margin:0 0 5px 2px}
+  select,button,input[type=text]{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--txt);font-size:13px;margin-bottom:10px}
+  select,button{cursor:pointer}
+  .go{background:var(--acc);color:#06101e;font-weight:700;border:none;margin-bottom:6px}
+  .go:hover{filter:brightness(1.08)}
+  .auto{background:transparent;color:var(--acc);border:1px solid var(--line)}
+  .auto:hover{border-color:var(--acc)}
+  .q{background:var(--panel2);border-left:3px solid var(--acc);border-radius:6px;
+     padding:7px 10px;margin-bottom:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+  .q.urgent{border-left-color:var(--urgent)} .q.low{border-left-color:var(--dim)}
+  .q .pr{font-size:9px;font-weight:800;letter-spacing:.6px}
+  .q.urgent .pr{color:var(--urgent)} .q.normal .pr{color:var(--acc)} .q.low .pr{color:var(--dim)}
+  .empty{color:var(--dim);font-size:12px;text-align:center;padding:14px 0}
+  .log{font-family:Consolas,'SF Mono',monospace;font-size:11px;color:var(--dim);
+       height:200px;overflow-y:auto;background:#0a0e14;border-radius:8px;padding:9px;line-height:1.7}
+  .iconbtn{width:auto;background:transparent;border:1px solid var(--line);color:var(--dim);
+    padding:4px 9px;font-size:11px;border-radius:7px;margin:0}
+  .iconbtn:hover{color:var(--txt);border-color:var(--acc)}
+  .hrow{display:flex;gap:6px;align-items:center}
+  ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#2b3543;border-radius:8px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ico">&#127981;</span> Warehouse Mission Control</div>
+  <div class="top-right">
+    <span id="conn" class="pill off"><span class="led"></span><span id="connTxt">connecting&#8230;</span></span>
+    <span class="elapsed">elapsed <b id="elapsed">00:00</b></span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat queued"><div class="lbl">tasks queued</div><div class="val" id="s-queued">0</div></div>
+  <div class="stat prog"><div class="lbl">in progress</div><div class="val" id="s-prog">0</div></div>
+  <div class="stat done"><div class="lbl">completed</div><div class="val" id="s-done">0</div></div>
+  <div class="stat idle"><div class="lbl">robots idle</div><div class="val" id="s-idle">0</div></div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <h2>Warehouse Map
+        <span class="legend">
+          <span><span class="d" style="background:var(--amr)"></span>AMR</span>
+          <span><span class="d" style="background:var(--drone)"></span>Drone</span>
+          <span><span class="d" style="background:var(--big)"></span>Big AMR</span>
+        </span>
+      </h2>
+      <canvas id="map" width="900" height="720"></canvas>
+      <div class="speed-row">
+        <label>Speed</label>
+        <input type="range" id="speed" min="0.5" max="4" step="0.5" value="1">
+        <span class="speed-val" id="speedVal">1&#215;</span>
+      </div>
+      <div class="robots" id="robots"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:14px">
+      <h2>Add Task</h2>
+      <label class="fld">box / package</label>
+      <select id="boxSel"></select>
+      <label class="fld">priority</label>
+      <select id="prioSel">
+        <option value="urgent">P1 &#8212; urgent (jumps queue)</option>
+        <option value="normal" selected>P2 &#8212; normal</option>
+        <option value="low">P3 &#8212; low</option>
+      </select>
+      <div style="font-size:11px;color:var(--dim);margin:-4px 0 10px 2px">
+        robot is auto-assigned by the scheduler
+      </div>
+      <button class="go" onclick="sendOrder()">+ add to queue</button>
+      <button class="auto" onclick="loadDemo()">load demo queue</button>
+    </div>
+
+    <div class="panel" style="margin-bottom:14px">
+      <h2>Priority Queue
+        <button class="iconbtn" onclick="clearQueueView()">clear view</button>
+      </h2>
+      <div id="queue"><div class="empty">queue is empty</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Activity Log
+        <span class="hrow">
+          <button class="iconbtn" onclick="exportLog()">&#8595; export</button>
+          <button class="iconbtn" onclick="clearLogView()">&#128465;</button>
+        </span>
+      </h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let ws, state=null;
+let startTime=Date.now(), logCleared=0, queueHidden=false;
+
+setInterval(()=>{
+  const s=Math.floor((Date.now()-startTime)/1000);
+  const mm=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0');
+  document.getElementById('elapsed').textContent=mm+':'+ss;
+},1000);
+
+function connect(){
+  ws=new WebSocket('ws://localhost:8765');
+  ws.onopen =()=>setConn(true);
+  ws.onclose=()=>{setConn(false);setTimeout(connect,1500);};
+  ws.onmessage=e=>{
+    const m=JSON.parse(e.data);
+    if(m.boxes) fillBoxes(m.boxes);
+    if(m.type==='state'){state=m.data;render();}
+  };
+}
+function setConn(ok){
+  const p=document.getElementById('conn');
+  p.className='pill '+(ok?'on':'off');
+  document.getElementById('connTxt').textContent=ok?'system online':'disconnected';
+}
+connect();
+
+function sendOrder(){
+  const box=document.getElementById('boxSel').value;
+  const priority=document.getElementById('prioSel').value;
+  if(box && ws && ws.readyState===1)
+    ws.send(JSON.stringify({type:'order',box,priority}));
+}
+function loadDemo(){
+  if(ws && ws.readyState===1) ws.send(JSON.stringify({type:'auto'}));
+}
+
+const speed=document.getElementById('speed');
+speed.oninput=()=>{
+  document.getElementById('speedVal').textContent=speed.value+'\u00d7';
+  if(ws && ws.readyState===1)
+    ws.send(JSON.stringify({type:'speed',value:parseFloat(speed.value)}));
+};
+
+function fillBoxes(list){
+  const sel=document.getElementById('boxSel');
+  if(sel.options.length) return;
+  const groups={'Drone — high boxes':[], 'AMR — low boxes':[], 'Big AMR — row-1 big boxes':[]};
+  list.forEach(b=>{
+    if(b.includes('high')) groups['Drone — high boxes'].push(b);
+    else if(b.startsWith('bigbox')) groups['Big AMR — row-1 big boxes'].push(b);
+    else groups['AMR — low boxes'].push(b);
+  });
+  for(const g in groups){
+    if(!groups[g].length) continue;
+    const og=document.createElement('optgroup'); og.label=g;
+    groups[g].forEach(b=>{const o=document.createElement('option');o.value=o.textContent=b;og.appendChild(o);});
+    sel.appendChild(og);
+  }
+}
+
+function exportLog(){
+  const lines=(state&&state.log)?state.log:[];
+  const blob=new Blob([lines.join('\n')+'\n'],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  a.href=url; a.download='warehouse_activity_log_'+ts+'.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function clearLogView(){ logCleared=(state&&state.log)?state.log.length:0; render(); }
+function clearQueueView(){ queueHidden=true; render(); }
+
+const COLORS={drone:'#4da3ff',amr:'#39d98a',amr2:'#2dd4bf',big_amr:'#ffb020'};
+const NAMES ={drone:'\ud83d\ude81 Drone',amr:'\ud83e\udd16 AMR-01',amr2:'\ud83e\udd16 AMR-02',big_amr:'\ud83d\ude9b Big AMR'};
+
+function render(){
+  if(!state) return;
+  const robots=['drone','amr','amr2','big_amr'];
+
+  const queued=(state.queue||[]).length;
+  const prog=robots.filter(k=>state[k]&&state[k].status==='BUSY').length;
+  const done=(state.done||[]).length;
+  const idle=robots.filter(k=>state[k]&&state[k].status==='IDLE').length;
+  document.getElementById('s-queued').textContent=queued;
+  document.getElementById('s-prog').textContent=prog;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-idle').textContent=idle;
+
+  let rh='';
+  for(const k of robots){
+    const r=state[k]; if(!r) continue;
+    const lidar=(r.lidar_min!=null)
+      ? '<br><span class="lidar">\u26a0 lidar '+(+r.lidar_min).toFixed(2)+'m</span>' : '';
+    rh+='<div class="rcard">'
+      +'<div class="name"><span class="dot" style="background:'+COLORS[k]+'"></span>'
+      +NAMES[k]+' <span class="badge '+r.status+'">'+r.status+'</span></div>'
+      +'<div class="meta">'+(r.step||'idle')+lidar+'</div></div>';
+  }
+  document.getElementById('robots').innerHTML=rh;
+
+  const q=queueHidden?[]:(state.queue||[]);
+  document.getElementById('queue').innerHTML = q.length
+    ? q.map(o=>'<div class="q '+o.priority+'">'
+        +'<span>'+o.box+' <span style="color:var(--dim)">\u2192 '+o.robot+'</span></span>'
+        +'<span class="pr">'+o.priority.toUpperCase()+'</span></div>').join('')
+    : '<div class="empty">queue is empty</div>';
+
+  const full=state.log||[];
+  const shown=full.slice(logCleared);
+  const lg=document.getElementById('log');
+  lg.innerHTML=shown.length?shown.join('<br>'):'<span style="color:#566">no recent activity</span>';
+  lg.scrollTop=lg.scrollHeight;
+
+  drawMap();
+}
+
+function drawMap(){
+  const c=document.getElementById('map'),ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const sx=x=>(x+15)/30*W, sy=y=>H-(y+12)/24*H;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.strokeStyle='#2b3543';ctx.lineWidth=3;
+  ctx.strokeRect(sx(-15),sy(12),sx(15)-sx(-15),sy(-12)-sy(12));
+
+  ctx.strokeStyle='#19212c';ctx.lineWidth=1;
+  [-6,0,6].forEach(x=>{ctx.beginPath();ctx.moveTo(sx(x),sy(12));ctx.lineTo(sx(x),sy(-12));ctx.stroke();});
+  [9,3,-3,-7.8].forEach(y=>{ctx.beginPath();ctx.moveTo(sx(-15),sy(y));ctx.lineTo(sx(15),sy(y));ctx.stroke();});
+
+  [6,0,-6].forEach(y=>{
+    [-9,-3,3,9].forEach(x=>{
+      ctx.fillStyle='#39455a';
+      ctx.fillRect(sx(x-1),sy(y+0.6),sx(x+1)-sx(x-1),sy(y-0.6)-sy(y+0.6));
+      ctx.fillStyle='#c98a2a';
+      ctx.fillRect(sx(x-0.9),sy(y+0.5),sx(x+0.9)-sx(x-0.9),sy(y-0.5)-sy(y+0.5));
+    });
+  });
+
+  ctx.fillStyle='#1e6fd9';ctx.fillRect(sx(-12),sy(-9),sx(-8)-sx(-12),sy(-11)-sy(-9));
+  ctx.fillStyle='#2fae5e';ctx.fillRect(sx(8.5),sy(-9),sx(11.5)-sx(8.5),sy(-11)-sy(-9));
+  ctx.fillStyle='#3a414d';ctx.fillRect(sx(-1.25),sy(-8.75),sx(1.25)-sx(-1.25),sy(-11.25)-sy(-8.75));
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(sx(-1),sy(-10));ctx.lineTo(sx(1),sy(-10));
+  ctx.moveTo(sx(0),sy(-8.9));ctx.lineTo(sx(0),sy(-11.1));ctx.stroke();
+
+  ctx.fillStyle='#9aa6b8';ctx.font='10px sans-serif';
+  ctx.fillText('CHARGE',sx(-11.4),sy(-10)+3);
+  ctx.fillText('PAD',sx(-0.5),sy(-7.6));
+  ctx.fillText('DELIVERY',sx(8.7),sy(-10)+3);
+  ctx.fillStyle='#5d6b80';ctx.font='9px sans-serif';
+  ctx.fillText('staging x=6',sx(6.2),sy(-2));
+
+  if(!state) return;
+  for(const k of ['amr','amr2','big_amr','drone']){
+    const r=state[k]; if(!r) continue;
+    const rad=k==='big_amr'?11:(k==='drone'?7:9);
+    if(r.status==='BUSY'){
+      ctx.beginPath();ctx.arc(sx(r.x),sy(r.y),rad+5,0,7);
+      ctx.strokeStyle=COLORS[k];ctx.globalAlpha=.4;ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.beginPath();ctx.arc(sx(r.x),sy(r.y),rad,0,7);
+    ctx.fillStyle=COLORS[k];ctx.fill();
+    ctx.strokeStyle='#0c1117';ctx.lineWidth=2;ctx.stroke();
+    if(r.carrying){ ctx.fillStyle='#06101e';ctx.fillRect(sx(r.x)-3,sy(r.y)-3,6,6); }
+  }
+}
+</script>
+</body>
+</html>
