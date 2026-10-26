@@ -1,39 +1,57 @@
-# Multi-robot-ware-house-automation-using-priority-scheduling-task
-Multi-robot warehouse automation with priority scheduling, PID navigation, drone-based shelf inspection and zone-reservation collision management — ROS2 Jazzy + Gazebo Harmonic
-# Overview
+# Multi-Robot Warehouse Automation Using Priority Scheduling
 
-A simulation framework for intelligent warehouse logistics built with ROS2 Jazzy 
-and Gazebo Harmonic. The system deploys one autonomous mobile robot (AMR) and one 
-quadrotor drone in a structured warehouse environment to demonstrate coordinated 
-multi-agent task execution with priority-based scheduling.
+Multi-robot warehouse automation with priority scheduling, PID navigation, drone-based shelf inspection and zone-reservation collision management — **ROS2 Jazzy + Gazebo Harmonic**.
 
-## What this system does
+## Overview
 
-The drone performs an autonomous aerial inspection loop over shelf rows, detecting 
-ArUco fiducial markers with its downward-facing camera and publishing shelf 
-occupancy status in real time. The centralized scheduler receives these detections 
-and dynamically builds a task queue scored by three criteria: task priority 
-(1–3), AMR distance to the target shelf, and elapsed waiting time (aging). 
-The highest-scoring task is dispatched to the AMR, which navigates to the shelf 
-using grid-based A* global planning and PID-based local trajectory tracking, 
-with a LiDAR safety stop active throughout execution. A zone-reservation 
-mechanism prevents simultaneous aerial and ground access to the same shelf zone. 
-Task outcomes are logged to CSV for quantitative evaluation.
+A simulation framework for intelligent warehouse logistics. A fleet of ground AMRs and a quadrotor drone operate in a shared Gazebo warehouse world, coordinated by a central scheduler that assigns pick-and-deliver tasks by priority, distance, and wait time — rather than a simple first-in-first-out queue.
 
-## Key technical contributions
+## What's in this repo
 
-- Multi-criteria task scorer combining priority, distance, and aging — 
-  prevents starvation and improves fleet throughput over naive priority queues
-- Drone-driven dynamic re-prioritisation — vision detections inject tasks 
-  at runtime, immediately surfacing in the scored dispatch cycle
-- Two-layer safety architecture — zone reservation for agent conflict 
-  prevention, LiDAR reactive stop for environment collision avoidance
-- Decoupled UI for manual task injection and live queue monitoring
-- Quantitative evaluation: task completion time vs priority level, 
-  queue drain time, prescan vs no-prescan throughput comparison
+| Path | Description |
+|---|---|
+| `src/warehouse_world/scripts/warehouse_master.py` | Core node: priority scheduler, AMR/drone task dispatch, and a WebSocket backend that drives the live UI |
+| `src/warehouse_world/scripts/drone_scheduler.py` | Drone task logic and the box/shelf coordinate map for high-shelf pickups |
+| `src/warehouse_world/scripts/drone_position_controller.py` | PID-based position/velocity controller for the drone (separate PID loops on x, y, z) |
+| `src/warehouse_world/urdf/` | Robot descriptions: ground AMRs (`warehouse_amr.urdf`, `warehouse_amr2.urdf`, `warehouse_big_amr.urdf`) and the quadrotor (`warehouse_drone.urdf`) |
+| `src/warehouse_world/worlds/warehouse.world` | The Gazebo warehouse environment |
+| `src/warehouse_world/worlds/patch_world.py` | Utility script for patching/regenerating the world file |
+| `src/warehouse_world/config/bridge_config.yaml` | `ros_gz_bridge` topic/service mappings between ROS2 and Gazebo (cmd_vel, IMU, pose teleport, etc.) for the drone and AMR fleet |
+| `warehouse_ui.html` | Browser dashboard for live task-queue monitoring and manual task injection, connected over WebSocket |
+| `READ_ME-Multi-Robot Warehouse Automation...pdf` | Full project write-up |
+
+## How it works
+
+- **Scheduling** — `warehouse_master.py` scores pending tasks on priority level (`urgent` / `normal` / `low`), distance from each AMR, and how long a task has been waiting, so low-priority tasks don't starve under a busy queue.
+- **Navigation** — Ground robots move via grid-based path planning with PID trajectory tracking; the drone runs its own PID loop on world-frame x/y/z position error for hover and cruise control.
+- **Drone inspection** — The drone flies an inspection pattern over shelf rows to pick up high-shelf boxes it can reach (`drone_scheduler.py`'s `BOX_MAP`), hovering top-down above each target.
+- **Collision/zone management** — Shared pickup/drop lanes and staging slots are coordinated between the three ground robots (`amr`, `amr2`, `big_amr`) and the drone to avoid simultaneous occupation of the same zone.
+- **Live UI** — `warehouse_master.py` runs an asyncio WebSocket server that `warehouse_ui.html` connects to for real-time task-queue visibility and manual task injection.
 
 ## Stack
 
-ROS2 Jazzy Jalisco · Gazebo Harmonic · Python 3 (rclpy) · OpenCV 4 · 
-Nav2 · SLAM Toolbox · RViz2
+ROS2 Jazzy Jalisco · Gazebo Harmonic · Python 3 (`rclpy`) · `ros_gz_bridge` / `ros_gz_interfaces` · `websockets`
 
+## Getting started
+
+> ⚠️ This repo currently holds the scripts, URDFs, world, and bridge config only — there's no `package.xml`/`setup.py` yet, so it isn't a colcon-installable package as-is. The steps below reflect that; add package metadata if you want `colcon build` / `ros2 run` to work directly.
+
+1. Install ROS2 Jazzy and Gazebo Harmonic, and make sure `ros_gz_bridge` / `ros_gz_interfaces` are available.
+2. Install the Python WebSocket dependency:
+   ```bash
+   pip install websockets --break-system-packages
+   ```
+3. Launch Gazebo with `src/warehouse_world/worlds/warehouse.world`, spawning the robots described by the URDFs in `src/warehouse_world/urdf/`.
+4. Bridge ROS2 ↔ Gazebo topics using the config file:
+   ```bash
+   ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=src/warehouse_world/config/bridge_config.yaml
+   ```
+5. Source your ROS2 environment, then run the scheduler directly:
+   ```bash
+   python3 src/warehouse_world/scripts/warehouse_master.py
+   ```
+6. Open `warehouse_ui.html` in a browser to watch and inject tasks live over the WebSocket connection.
+
+## Notes
+
+- `build/`, `install/`, and `log/` are excluded from version control via `.gitignore` — these are generated by colcon if/when the workspace is turned into a proper package.
